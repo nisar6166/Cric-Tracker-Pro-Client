@@ -21,7 +21,7 @@ const Home = () => {
   // Determining the correct profile photo URL
   const getProfileImg = () => {
     if (profilePic && profilePic !== "undefined") {
-      return `http://localhost:5000/${profilePic}`;
+      return `${import.meta.env.VITE_API_URL}/${profilePic}`;
     }
     return "https://placehold.co/150?text=No+Photo";
   };

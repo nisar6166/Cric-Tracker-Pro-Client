@@ -8,7 +8,7 @@ const Inbox = () => {
     useEffect(() => {
         const fetchMessages = async () => {
             try {
-                const { data } = await axios.get('http://localhost:5000/api/contact/all');
+                const { data } = await axios.get(import.meta.env.VITE_API_URL + '/api/contact/all');
                 setMessages(data);
                 setLoading(false);
             } catch (err) {
@@ -24,7 +24,7 @@ const Inbox = () => {
         if (!window.confirm("Are you sure you want to delete this message?")) return;
         
         try {
-            await axios.delete(`http://localhost:5000/api/contact/delete/${id}`);
+            await axios.delete(`${import.meta.env.VITE_API_URL}/api/contact/delete/${id}`);
             setMessages(messages.filter(msg => msg._id !== id));
             alert("Message deleted successfully! 🗑️");
         } catch (err) {

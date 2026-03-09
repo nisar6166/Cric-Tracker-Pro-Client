@@ -45,7 +45,7 @@ const StartTournament = () => {
     if (isEditMode) {
       const loadTournament = async () => {
         try {
-          const res = await axios.get(`http://localhost:5000/api/tournaments/${id}`);
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/tournaments/${id}`);
           const t = res.data;
           setName(t.tournamentName || '');
           setCity(t.city || '');
@@ -113,12 +113,12 @@ const StartTournament = () => {
       if (banner) formData.append('banner', banner);
 
       if (isEditMode) {
-        await axios.put(`http://localhost:5000/api/tournaments/update/${id}`, formData, {
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/tournaments/update/${id}`, formData, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         setSuccess('Tournament Updated Successfully! 🎉');
       } else {
-        await axios.post('http://localhost:5000/api/tournaments/create', formData, {
+        await axios.post(import.meta.env.VITE_API_URL + '/api/tournaments/create', formData, {
           headers: { 'Authorization': `Bearer ${token}` } 
         });
         setSuccess('Tournament Created Successfully! 🎉');

@@ -145,7 +145,7 @@ const ViewerTournamentDetails = () => {
   const [leaderboard, setLeaderboard] = useState({ topRuns: [], topWickets: [], mvp: [] });
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/tournaments/${id}`)
+    axios.get(`${import.meta.env.VITE_API_URL}/api/tournaments/${id}`)
       .then(r => setTournament(r.data))
       .catch(err => console.error('Error fetching tournament:', err))
       .finally(() => setLoading(false));
@@ -162,7 +162,7 @@ const ViewerTournamentDetails = () => {
        
         const responses = await Promise.all(
           completedMatches.map(m => 
-            axios.get(`http://localhost:5000/api/scorecard/${m._id || m}`)
+            axios.get(`${import.meta.env.VITE_API_URL}/api/scorecard/${m._id || m}`)
                  .catch(err => null) 
           )
         );

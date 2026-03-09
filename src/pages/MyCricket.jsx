@@ -49,10 +49,10 @@ const MyCricket = () => {
     setIsLoading(true);
     try {
       const [matchRes, teamRes, playerRes, tournamentRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/matches/all'),
-        axios.get('http://localhost:5000/api/teams/all'),
-        axios.get('http://localhost:5000/api/players/all'),
-        axios.get('http://localhost:5000/api/tournaments/all')
+        axios.get(import.meta.env.VITE_API_URL + '/api/matches/all'),
+        axios.get(import.meta.env.VITE_API_URL + '/api/teams/all'),
+        axios.get(import.meta.env.VITE_API_URL + '/api/players/all'),
+        axios.get(import.meta.env.VITE_API_URL + '/api/tournaments/all')
       ]);
       setMatches(matchRes.data);
       setTeams(teamRes.data);
@@ -75,7 +75,7 @@ const MyCricket = () => {
   };
 
   const getProfileImg = () => {
-    if (profilePic && profilePic !== "undefined") return `http://localhost:5000/${profilePic}`;
+    if (profilePic && profilePic !== "undefined") return `${import.meta.env.VITE_API_URL}/${profilePic}`;
     return "https://placehold.co/150?text=No+Photo";
   };
 
@@ -83,7 +83,7 @@ const MyCricket = () => {
   const handleDeleteMatch = async (id) => {
     if (!window.confirm("Delete this match?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/matches/delete/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/matches/delete/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
       fetchAllData();
     } catch (err) { alert("Failed to delete match."); }
   };
@@ -91,7 +91,7 @@ const MyCricket = () => {
   const handleDeleteTournament = async (id) => {
     if (!window.confirm("Delete this tournament?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/tournaments/delete/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/tournaments/delete/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
       fetchAllData();
     } catch (err) { alert("Failed to delete tournament."); }
   };
@@ -99,7 +99,7 @@ const MyCricket = () => {
   const handleDeleteTeam = async (id) => {
     if (!window.confirm("Delete this team?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/teams/delete/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/teams/delete/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
       fetchAllData();
     } catch (err) { alert("Failed to delete team."); }
   };
@@ -111,7 +111,7 @@ const MyCricket = () => {
   const handleUpdateTeam = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/teams/update/${editTeamId}`,
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/teams/update/${editTeamId}`,
         { teamName: editTeamName, location: editTeamLocation },
         { headers: { 'Authorization': `Bearer ${token}` } });
       setShowTeamModal(false); fetchAllData();
@@ -121,7 +121,7 @@ const MyCricket = () => {
   const handleDeletePlayer = async (id) => {
     if (!window.confirm("Delete this player?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/players/delete/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/players/delete/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
       fetchAllData();
     } catch (err) { alert("Failed to delete player."); }
   };
@@ -133,7 +133,7 @@ const MyCricket = () => {
   const handleUpdatePlayer = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/players/update/${editPlayerId}`,
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/players/update/${editPlayerId}`,
         { name: editPlayerName, role: editPlayerRole },
         { headers: { 'Authorization': `Bearer ${token}` } });
       setShowPlayerModal(false); fetchAllData();
@@ -270,7 +270,7 @@ const MyCricket = () => {
                 <div key={tourney._id} className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition flex flex-col">
                   <div className="h-32 bg-gray-200 relative">
                     {tourney.tournamentBanner ? (
-                      <img src={`http://localhost:5000/${tourney.tournamentBanner}`} alt="banner" className="w-full h-full object-cover" />
+                      <img src={`${import.meta.env.VITE_API_URL}/${tourney.tournamentBanner}`} alt="banner" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-r from-blue-400 to-blue-600"></div>
                     )}
@@ -279,7 +279,7 @@ const MyCricket = () => {
                   <div className="p-5 pt-12 relative flex-1 flex flex-col">
                     <div className="absolute -top-10 left-5 w-20 h-20 bg-white rounded-full border-4 border-white shadow-md overflow-hidden flex justify-center items-center">
                       {tourney.tournamentLogo ? (
-                        <img src={`http://localhost:5000/${tourney.tournamentLogo}`} alt="logo" className="w-full h-full object-cover" />
+                        <img src={`${import.meta.env.VITE_API_URL}/${tourney.tournamentLogo}`} alt="logo" className="w-full h-full object-cover" />
                       ) : (<span className="text-2xl">🏆</span>)}
                     </div>
                     <h3 className="text-xl font-extrabold text-gray-900 mb-1">{tourney.tournamentName}</h3>
@@ -329,7 +329,7 @@ const MyCricket = () => {
                 <div key={team._id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center hover:shadow-md transition">
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-100 border-2 border-green-100 flex-shrink-0">
-                      <img src={team.teamLogo ? `http://localhost:5000/${team.teamLogo}` : "https://placehold.co/150?text=Logo"} alt={team.teamName} className="w-full h-full object-cover" />
+                      <img src={team.teamLogo ? `${import.meta.env.VITE_API_URL}/${team.teamLogo}` : "https://placehold.co/150?text=Logo"} alt={team.teamName} className="w-full h-full object-cover" />
                     </div>
                     <div>
                       <h3 className="font-bold text-gray-800 text-lg">{team.teamName}</h3>
@@ -364,7 +364,7 @@ const MyCricket = () => {
                   <div className="absolute top-0 right-0 bg-purple-100 text-purple-800 text-[10px] font-bold px-2 py-1 rounded-bl-lg">{player.role}</div>
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-100 border-2 border-purple-100 flex-shrink-0 mt-2">
-                      <img src={player.profileImage ? `http://localhost:5000/${player.profileImage}` : "https://placehold.co/150?text=Player"} alt={player.name} className="w-full h-full object-cover" />
+                      <img src={player.profileImage ? `${import.meta.env.VITE_API_URL}/${player.profileImage}` : "https://placehold.co/150?text=Player"} alt={player.name} className="w-full h-full object-cover" />
                     </div>
                     <div className="mt-2">
                       <h3 className="font-bold text-gray-800 text-lg">{player.name}</h3>

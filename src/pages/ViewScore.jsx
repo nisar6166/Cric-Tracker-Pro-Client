@@ -19,12 +19,12 @@ const ViewScore = () => {
 
   const fetchMatchAndScore = async () => {
     try {
-      const matchRes = await axios.get('http://localhost:5000/api/matches/all');
+      const matchRes = await axios.get(import.meta.env.VITE_API_URL + '/api/matches/all');
       const currentMatch = matchRes.data.find(m => m._id === matchId);
       setMatch(currentMatch);
 
       const timestamp = new Date().getTime();
-      const scoreRes = await axios.get(`http://localhost:5000/api/scorecard/${matchId}?t=${timestamp}`);
+      const scoreRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/scorecard/${matchId}?t=${timestamp}`);
       
       if (scoreRes.data) {
         setScorecard(scoreRes.data);
@@ -270,7 +270,7 @@ const ViewScore = () => {
                 {matchStats.mvpPlayer && (
                     <div className="flex flex-col items-center mb-6">
                         <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-4xl shadow-lg border-4 border-yellow-400 z-10">
-                            {matchStats.mvpPlayer.profilePic ? <img src={`http://localhost:5000/${matchStats.mvpPlayer.profilePic}`} className="w-full h-full rounded-full object-cover" alt="MVP"/> : '🏅'}
+                            {matchStats.mvpPlayer.profilePic ? <img src={`${import.meta.env.VITE_API_URL}/${matchStats.mvpPlayer.profilePic}`} className="w-full h-full rounded-full object-cover" alt="MVP"/> : '🏅'}
                         </div>
                         <h2 className="text-2xl font-black mt-2 z-10 text-center">{matchStats.mvpPlayer.name}</h2>
                         <p className="text-sm font-bold text-indigo-200 uppercase tracking-widest">Player of the Match</p>

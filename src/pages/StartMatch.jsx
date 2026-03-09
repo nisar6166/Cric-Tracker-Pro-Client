@@ -34,7 +34,7 @@ const StartMatch = () => {
 
   const fetchTeamsList = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/teams/all');
+      const response = await axios.get(import.meta.env.VITE_API_URL + '/api/teams/all');
       setTeams(response.data);
       return response.data;
     } catch (err) {
@@ -48,7 +48,7 @@ const StartMatch = () => {
 
       if (isEditMode) {
         try {
-          const matchRes = await axios.get(`http://localhost:5000/api/matches/${matchId}`);
+          const matchRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/matches/${matchId}`);
           const matchData = matchRes.data;
           
           const tA_id = (matchData.teamA && typeof matchData.teamA === 'object') ? matchData.teamA._id : matchData.teamA;
@@ -96,7 +96,7 @@ const StartMatch = () => {
       formData.append('location', modalLocation);
       if (modalLogo) formData.append('teamLogo', modalLogo);
 
-      const response = await axios.post('http://localhost:5000/api/teams/add', formData, {
+      const response = await axios.post(import.meta.env.VITE_API_URL + '/api/teams/add', formData, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -134,14 +134,14 @@ const StartMatch = () => {
       };
 
       if (isEditMode) {
-        await axios.put(`http://localhost:5000/api/matches/update/${matchId}`, matchData, {
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/matches/update/${matchId}`, matchData, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         setSuccess('Match updated successfully!');
         setTimeout(() => navigate('/mycricket'), 1500);
       } else {
         // Create New Match & directly navigate back to MyCricket page
-        await axios.post('http://localhost:5000/api/matches/create', matchData, {
+        await axios.post(import.meta.env.VITE_API_URL + '/api/matches/create', matchData, {
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
         setSuccess('Match scheduled successfully!');

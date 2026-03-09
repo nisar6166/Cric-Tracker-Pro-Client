@@ -55,7 +55,7 @@ const Signup = () => {
       }
 
       // 2. Sending data via Axios (Content-Type will be set automatically)
-      const response = await axios.post('http://localhost:5000/api/auth/register', data);
+      const response = await axios.post(import.meta.env.VITE_API_URL + '/api/auth/register', data);
       
       setSuccess("Account created successfully! Redirecting to login...");
       

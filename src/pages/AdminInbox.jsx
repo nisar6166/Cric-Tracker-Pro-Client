@@ -9,7 +9,7 @@ const AdminInbox = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/contact/all');
+        const response = await axios.get(import.meta.env.VITE_API_URL + '/api/contact/all');
         setMessages(response.data);
         setLoading(false);
       } catch (err) {

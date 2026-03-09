@@ -103,7 +103,7 @@ const ScoreMatch = () => {
 
     const fetchData = async () => {
       try {
-        const matchRes = await axios.get(`http://localhost:5000/api/matches/all`);
+        const matchRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/matches/all`);
         const currentMatch = matchRes.data.find(m => m._id === id);
         setMatch(currentMatch);
         if (!savedData && currentMatch?.status) setMatchStatus(currentMatch.status);
@@ -116,7 +116,7 @@ const ScoreMatch = () => {
 
   const fetchPlayersData = async (currentMatch) => {
     try {
-      const playersRes = await axios.get(`http://localhost:5000/api/players/all`);
+      const playersRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/players/all`);
       const allPlayers = playersRes.data;
       if (currentMatch) {
         const tAId = currentMatch.teamA?._id || currentMatch.teamA;
@@ -183,7 +183,7 @@ const ScoreMatch = () => {
         secondInnings: innings === 2 ? currentInningsData : null
       };
 
-      await axios.post(`http://localhost:5000/api/scorecard/save/${id}`, payload, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/scorecard/save/${id}`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -232,7 +232,7 @@ const ScoreMatch = () => {
     if (reason) setPauseReason(reason);
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:5000/api/matches/update/${id}`,
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/matches/update/${id}`,
         { status, pauseReason: reason, manOfTheMatch: mvpData, winner: winnerId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -251,7 +251,7 @@ const ScoreMatch = () => {
       formData.append('age', newPlayerAge);
       formData.append('mobile', newPlayerMobile);
 
-      const res = await axios.post('http://localhost:5000/api/players/add', formData, {
+      const res = await axios.post(import.meta.env.VITE_API_URL + '/api/players/add', formData, {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
       });
 

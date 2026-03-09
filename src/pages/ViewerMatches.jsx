@@ -12,8 +12,8 @@ const ViewerMatches = () => {
     const fetchData = async () => {
       try {
         const [matchRes, tourneyRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/matches/all'),
-          axios.get('http://localhost:5000/api/tournaments/all')
+          axios.get(import.meta.env.VITE_API_URL + '/api/matches/all'),
+          axios.get(import.meta.env.VITE_API_URL + '/api/tournaments/all')
         ]);
         setMatches(matchRes.data);
         setTournaments(tourneyRes.data);

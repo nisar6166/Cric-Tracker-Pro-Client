@@ -42,7 +42,7 @@ const AddTeam = () => {
       }
 
       // 3. Send data to the API
-      const response = await axios.post('http://localhost:5000/api/teams/add', formData, {
+      const response = await axios.post(import.meta.env.VITE_API_URL + '/api/teams/add', formData, {
         headers: {
           'Authorization': `Bearer ${token}` // Attach Admin token
         }

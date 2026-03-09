@@ -65,10 +65,10 @@ const TournamentDashboard = () => {
             };
 
             if (isEditingMatch) {
-                await axios.put(`http://localhost:5000/api/matches/update/${editingMatchId}`, payload, { headers: { 'Authorization': `Bearer ${token}` } });
+                await axios.put(`${import.meta.env.VITE_API_URL}/api/matches/update/${editingMatchId}`, payload, { headers: { 'Authorization': `Bearer ${token}` } });
                 alert("Match updated successfully! ✅");
             } else {
-                await axios.post(`http://localhost:5000/api/tournaments/${id}/schedule-match`, payload, { headers: { 'Authorization': `Bearer ${token}` } });
+                await axios.post(`${import.meta.env.VITE_API_URL}/api/tournaments/${id}/schedule-match`, payload, { headers: { 'Authorization': `Bearer ${token}` } });
                 alert("League Match scheduled successfully! 🏏");
             }
 
@@ -94,7 +94,7 @@ const TournamentDashboard = () => {
     const handleDeleteMatch = async (matchId) => {
         if (!window.confirm("Are you sure you want to delete this match?")) return;
         try {
-            await axios.delete(`http://localhost:5000/api/matches/delete/${matchId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            await axios.delete(`${import.meta.env.VITE_API_URL}/api/matches/delete/${matchId}`, { headers: { 'Authorization': `Bearer ${token}` } });
             alert("Match deleted successfully! 🗑️");
             fetchTournamentData();
         } catch (err) { alert("Failed to delete match."); }
@@ -108,7 +108,7 @@ const TournamentDashboard = () => {
         if (finalMatchData.teamA === finalMatchData.teamB) return alert("Please select different teams for the Final!");
 
         try {
-            await axios.post(`http://localhost:5000/api/tournaments/${id}/generate-knockouts`, {
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/tournaments/${id}/generate-knockouts`, {
                 stage: 'Final',
                 matches: [finalMatchData]
             }, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -121,7 +121,7 @@ const TournamentDashboard = () => {
 
     const fetchTournamentData = async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/tournaments/${id}`);
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/tournaments/${id}`);
             setTournament(res.data);
             if (res.data.pools && res.data.pools.length > 0) {
                 setTempPools(res.data.pools);
@@ -132,7 +132,7 @@ const TournamentDashboard = () => {
 
     const fetchAvailableTeams = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/teams/all');
+            const res = await axios.get(import.meta.env.VITE_API_URL + '/api/teams/all');
             setAvailableTeams(res.data);
         } catch (err) { console.error("Failed to fetch teams", err); }
     };
@@ -156,7 +156,7 @@ const TournamentDashboard = () => {
     const handleAddTeamToTournament = async (teamId) => {
         setAddingTeamId(teamId);
         try {
-            await axios.post(`http://localhost:5000/api/tournaments/${id}/add-team`, { teamId }, {
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/tournaments/${id}/add-team`, { teamId }, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             await fetchTournamentData();
@@ -181,11 +181,11 @@ const TournamentDashboard = () => {
             formData.append('location', newTeamLocation);
             if (newTeamLogo) formData.append('teamLogo', newTeamLogo);
 
-            const teamRes = await axios.post('http://localhost:5000/api/teams/add', formData, {
+            const teamRes = await axios.post(import.meta.env.VITE_API_URL + '/api/teams/add', formData, {
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
             });
             const newTeamId = teamRes.data.team?._id || teamRes.data._id;
-            await axios.post(`http://localhost:5000/api/tournaments/${id}/add-team`, { teamId: newTeamId }, {
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/tournaments/${id}/add-team`, { teamId: newTeamId }, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -227,7 +227,7 @@ const TournamentDashboard = () => {
     const handleRemoveTeamFromTournament = async (teamId) => {
         if (!window.confirm("Remove this team from the tournament?")) return;
         try {
-            await axios.put(`http://localhost:5000/api/tournaments/${id}/remove-team`, { teamId }, {
+            await axios.put(`${import.meta.env.VITE_API_URL}/api/tournaments/${id}/remove-team`, { teamId }, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             alert("Team removed successfully!");
@@ -237,7 +237,7 @@ const TournamentDashboard = () => {
 
     const savePools = async () => {
         try {
-            await axios.put(`http://localhost:5000/api/tournaments/${id}/assign-pools`, { pools: tempPools }, {
+            await axios.put(`${import.meta.env.VITE_API_URL}/api/tournaments/${id}/assign-pools`, { pools: tempPools }, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             alert("Pools updated! 🏆");
@@ -330,7 +330,7 @@ const TournamentDashboard = () => {
         if (!window.confirm(`Are you sure you want to generate ${matchesToCreate.length} ${stageName} match(es) for the Top ${qualifyCount} teams?`)) return;
 
         try {
-            await axios.post(`http://localhost:5000/api/tournaments/${id}/generate-knockouts`, { stage: stageName, matches: matchesToCreate }, { headers: { 'Authorization': `Bearer ${token}` } });
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/tournaments/${id}/generate-knockouts`, { stage: stageName, matches: matchesToCreate }, { headers: { 'Authorization': `Bearer ${token}` } });
             alert(`✅ ${stageName} matches generated successfully! 🏆`);
             fetchTournamentData();
             setActiveTab('MATCHES');
@@ -394,7 +394,7 @@ const TournamentDashboard = () => {
         try {
 
             for (let match of bulkMatchesList) {
-                await axios.post(`http://localhost:5000/api/tournaments/${id}/schedule-match`, {
+                await axios.post(`${import.meta.env.VITE_API_URL}/api/tournaments/${id}/schedule-match`, {
                     teamA: match.teamA,
                     teamB: match.teamB,
                     date: match.matchDateTime,
@@ -515,10 +515,10 @@ const TournamentDashboard = () => {
         <div className="min-h-screen bg-gray-50 font-sans pb-10">
             {/* BANNER & LOGO */}
             <div className="relative bg-blue-900 h-48 md:h-64 flex justify-center items-center">
-                {tournament.tournamentBanner ? <img src={`http://localhost:5000/${tournament.tournamentBanner}`} className="w-full h-full object-cover opacity-50" alt="Banner" /> : <div className="w-full h-full bg-gradient-to-r from-blue-900 to-indigo-800 opacity-90"></div>}
+                {tournament.tournamentBanner ? <img src={`${import.meta.env.VITE_API_URL}/${tournament.tournamentBanner}`} className="w-full h-full object-cover opacity-50" alt="Banner" /> : <div className="w-full h-full bg-gradient-to-r from-blue-900 to-indigo-800 opacity-90"></div>}
                 <div className="absolute -bottom-12 left-6 md:left-12 flex items-end gap-4">
                     <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-xl shadow-xl border-4 border-white overflow-hidden flex justify-center items-center z-10">
-                        {tournament.tournamentLogo ? <img src={`http://localhost:5000/${tournament.tournamentLogo}`} className="w-full h-full object-cover" alt="Logo" /> : <span className="text-4xl">🏆</span>}
+                        {tournament.tournamentLogo ? <img src={`${import.meta.env.VITE_API_URL}/${tournament.tournamentLogo}`} className="w-full h-full object-cover" alt="Logo" /> : <span className="text-4xl">🏆</span>}
                     </div>
                 </div>
             </div>
@@ -659,7 +659,7 @@ const TournamentDashboard = () => {
                                                 return team ? (
                                                     <div key={team._id} className="flex items-center justify-between p-2 bg-blue-50 rounded-lg border border-blue-100">
                                                         <div className="flex items-center gap-2">
-                                                            <img src={`http://localhost:5000/${team.teamLogo}`} className="w-6 h-6 rounded-full object-cover" alt="logo" />
+                                                            <img src={`${import.meta.env.VITE_API_URL}/${team.teamLogo}`} className="w-6 h-6 rounded-full object-cover" alt="logo" />
                                                             <span className="font-bold text-xs">{team.teamName}</span>
                                                         </div>
 
@@ -680,7 +680,7 @@ const TournamentDashboard = () => {
                                         <div className="p-4 grid grid-cols-1 gap-2">
                                             {pool.teams.map(team => (
                                                 <div key={team._id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                                    <img src={`http://localhost:5000/${team.teamLogo}`} className="w-10 h-10 rounded-full border bg-white" alt="logo" />
+                                                    <img src={`${import.meta.env.VITE_API_URL}/${team.teamLogo}`} className="w-10 h-10 rounded-full border bg-white" alt="logo" />
                                                     <span className="font-black text-gray-700 text-sm">{team.teamName}</span>
                                                 </div>
                                             ))}
@@ -731,7 +731,7 @@ const TournamentDashboard = () => {
                                                                 <td className="px-4 py-3 text-center text-gray-500 font-bold">{index + 1}</td>
                                                                 <td className="px-2 py-3 flex items-center gap-3">
                                                                     <div className="w-6 h-6 rounded-full border border-gray-200 overflow-hidden bg-white flex-shrink-0">
-                                                                        <img src={team.teamLogo ? `http://localhost:5000/${team.teamLogo}` : 'https://placehold.co/100'} className="w-full h-full object-cover" alt="logo" />
+                                                                        <img src={team.teamLogo ? `${import.meta.env.VITE_API_URL}/${team.teamLogo}` : 'https://placehold.co/100'} className="w-full h-full object-cover" alt="logo" />
                                                                     </div>
                                                                     <span className="font-bold text-[13px]">{team.teamName}</span>
                                                                 </td>
@@ -852,13 +852,13 @@ const TournamentDashboard = () => {
                                             <div key={match._id} className="bg-white border-2 border-gray-200 hover:border-blue-500 rounded-xl p-4 shadow-md relative z-10 transition transform hover:-translate-y-1">
                                                 <div className="flex justify-between items-center border-b border-gray-100 pb-3 mb-3">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-full border bg-gray-50 overflow-hidden"><img src={`http://localhost:5000/${match.teamA?.teamLogo}`} className="w-full h-full object-cover" alt="A" /></div>
+                                                        <div className="w-8 h-8 rounded-full border bg-gray-50 overflow-hidden"><img src={`${import.meta.env.VITE_API_URL}/${match.teamA?.teamLogo}`} className="w-full h-full object-cover" alt="A" /></div>
                                                         <span className="font-bold text-gray-800">{match.teamA?.teamName}</span>
                                                     </div>
                                                 </div>
                                                 <div className="flex justify-between items-center mb-3">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-full border bg-gray-50 overflow-hidden"><img src={`http://localhost:5000/${match.teamB?.teamLogo}`} className="w-full h-full object-cover" alt="B" /></div>
+                                                        <div className="w-8 h-8 rounded-full border bg-gray-50 overflow-hidden"><img src={`${import.meta.env.VITE_API_URL}/${match.teamB?.teamLogo}`} className="w-full h-full object-cover" alt="B" /></div>
                                                         <span className="font-bold text-gray-800">{match.teamB?.teamName}</span>
                                                     </div>
                                                 </div>
@@ -886,13 +886,13 @@ const TournamentDashboard = () => {
                                                 <div key={match._id} className="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-400 rounded-xl p-5 shadow-xl relative z-10 transform scale-105">
                                                     <div className="flex justify-between items-center border-b border-yellow-200 pb-3 mb-3">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden"><img src={`http://localhost:5000/${match.teamA?.teamLogo}`} className="w-full h-full object-cover" alt="A" /></div>
+                                                            <div className="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden"><img src={`${import.meta.env.VITE_API_URL}/${match.teamA?.teamLogo}`} className="w-full h-full object-cover" alt="A" /></div>
                                                             <span className="font-extrabold text-gray-900">{match.teamA?.teamName}</span>
                                                         </div>
                                                     </div>
                                                     <div className="flex justify-between items-center mb-4">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden"><img src={`http://localhost:5000/${match.teamB?.teamLogo}`} className="w-full h-full object-cover" alt="B" /></div>
+                                                            <div className="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden"><img src={`${import.meta.env.VITE_API_URL}/${match.teamB?.teamLogo}`} className="w-full h-full object-cover" alt="B" /></div>
                                                             <span className="font-extrabold text-gray-900">{match.teamB?.teamName}</span>
                                                         </div>
                                                     </div>
@@ -952,7 +952,7 @@ const TournamentDashboard = () => {
                                     {teamsToShow.length > 0 ? teamsToShow.map((team) => (
                                         <div key={team._id} className="border rounded-xl p-3 flex justify-between items-center hover:bg-blue-50 transition">
                                             <div className="flex items-center gap-3">
-                                                <img src={team.teamLogo ? `http://localhost:5000/${team.teamLogo}` : "https://placehold.co/100?text=Logo"} alt="logo" className="w-10 h-10 rounded-full border" />
+                                                <img src={team.teamLogo ? `${import.meta.env.VITE_API_URL}/${team.teamLogo}` : "https://placehold.co/100?text=Logo"} alt="logo" className="w-10 h-10 rounded-full border" />
                                                 <div><h4 className="font-bold text-gray-800 text-sm">{team.teamName}</h4><p className="text-xs text-gray-500">{team.location}</p></div>
                                             </div>
                                             <button onClick={() => handleAddTeamToTournament(team._id)} disabled={addingTeamId === team._id} className="bg-blue-100 text-blue-700 px-4 py-1.5 rounded-lg text-xs font-bold transition disabled:opacity-50">{addingTeamId === team._id ? '⏳' : 'Add ➕'}</button>

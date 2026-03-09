@@ -28,7 +28,7 @@ const Contact = () => {
   e.preventDefault();
   try {
     // send message to backend
-    await axios.post('http://localhost:5000/api/contact/submit', formData);
+    await axios.post(import.meta.env.VITE_API_URL + '/api/contact/submit', formData);
     
     alert("Message Sent Successfully! We will contact you soon.");
     setFormData({ name: '', email: '', subject: '', message: '' });

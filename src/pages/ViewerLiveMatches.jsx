@@ -9,7 +9,7 @@ const ViewerLiveMatches = () => {
 
   const fetchMatches = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/matches/all');
+      const res = await axios.get(import.meta.env.VITE_API_URL + '/api/matches/all');
       
       let filtered = [];
       if (activeTab === 'Completed') {
