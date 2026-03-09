@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import MatchAnalysis from '../components/MatchAnalysis';
@@ -10,6 +10,12 @@ const ViewScore = () => {
   const [loading, setLoading] = useState(true);
   const [matchStats, setMatchStats] = useState(null);
   const [activeTab, setActiveTab] = useState('Scorecard');
+
+  const matchRef = useRef(null);
+
+  useEffect(() => {
+    matchRef.current = match;
+  }, [match]);
 
   const fetchMatchAndScore = async () => {
     try {
@@ -36,11 +42,11 @@ const ViewScore = () => {
 
   useEffect(() => {
     fetchMatchAndScore();
-    const interval = setInterval(() => { 
-        if(match?.status !== 'Completed') fetchMatchAndScore(); 
+    const interval = setInterval(() => {
+      if (matchRef.current?.status !== 'Completed') fetchMatchAndScore();
     }, 3000);
     return () => clearInterval(interval);
-  }, [matchId, match?.status]);
+  }, [matchId]);
 
   // Identifying MVP (Man of the Match) and top individual performers automatically
   const calculatePostMatchStats = (data) => {
@@ -229,6 +235,13 @@ const ViewScore = () => {
       </nav>
 
       <div className="max-w-4xl mx-auto md:mt-4 flex flex-col gap-3 p-2">
+
+        {/*  Match Stage / Round Badge */}
+        <div className="flex justify-center w-full">
+            <span className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-1.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest shadow-lg border border-white/20">
+                {match?.roundName || match?.stage || scorecard?.stage || 'League Match'}
+            </span>
+        </div>
         
         {/*  Result Banner */}
         {match.status === 'Completed' && scorecard?.resultString ? (

@@ -227,13 +227,13 @@ const ScoreMatch = () => {
     }
   }, [bowlerActive]);
 
-  const updateMatchStatusDB = async (status, reason = '', mvpData = null) => {
+  const updateMatchStatusDB = async (status, reason = '', mvpData = null, winnerId = null) => {
     setMatchStatus(status);
     if (reason) setPauseReason(reason);
     try {
       const token = localStorage.getItem('token');
       await axios.put(`http://localhost:5000/api/matches/update/${id}`,
-        { status, pauseReason: reason, manOfTheMatch: mvpData },
+        { status, pauseReason: reason, manOfTheMatch: mvpData, winner: winnerId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
     } catch (err) { console.error("Error updating DB:", err); }
@@ -299,11 +299,13 @@ const ScoreMatch = () => {
     syncScoreToDB(); // Initial Sync Call
   };
 
+  //  FIXED: Added setupStep to the history snapshot
   const saveToHistory = () => {
-    const currentState = { runs, wickets, overs, balls, thisOver, batter1, batter2, onStrike, outBatsmenIds, bowlerActive, bowlerStatsMap, batterStatsMap, bowlerOverRuns, innings, targetScore };
+    const currentState = { runs, wickets, overs, balls, thisOver, batter1, batter2, onStrike, outBatsmenIds, bowlerActive, bowlerStatsMap, batterStatsMap, bowlerOverRuns, innings, targetScore, setupStep };
     setHistory(prev => [...prev, currentState].slice(-15));
   };
 
+  //  FIXED: Added setSetupStep restore on undo
   const handleUndo = () => {
     if (history.length === 0) return alert("No previous balls to undo!");
     const prevState = history[history.length - 1];
@@ -313,6 +315,7 @@ const ScoreMatch = () => {
     setOnStrike(prevState.onStrike); setOutBatsmenIds(prevState.outBatsmenIds); setBowlerActive(prevState.bowlerActive);
     setBowlerStatsMap(prevState.bowlerStatsMap); setBatterStatsMap(prevState.batterStatsMap); setBowlerOverRuns(prevState.bowlerOverRuns);
     setInnings(prevState.innings); setTargetScore(prevState.targetScore);
+    setSetupStep(prevState.setupStep ?? 3); // ✅ Fixed: Restore setupStep to prevent wrong screen flash
     setHistory(prev => prev.slice(0, -1));
     syncScoreToDB(); // Sync on Undo
   };
@@ -359,8 +362,17 @@ const ScoreMatch = () => {
     let mvpId = Object.keys(playerPoints).sort((a, b) => playerPoints[b] - playerPoints[a])[0];
     let mvpData = mvpId ? { name: playerNames[mvpId], desc: `${playerPoints[mvpId]} Points` } : null;
 
-    // Sending status and MVP data together to the backend
-    updateMatchStatusDB('Completed', '', mvpData);
+    // Determine the winner team ID for the points table
+    let winnerId = null;
+    if (finalRuns >= targetScore) {
+      winnerId = tossBowlTeamId; // chasing team won
+    } else if (finalRuns < targetScore - 1) {
+      winnerId = tossBatTeamId; // first batting team won
+    }
+    // if tied (finalRuns === targetScore - 1), winnerId stays null
+
+    // Sending status, MVP data, and winner together to the backend
+    updateMatchStatusDB('Completed', '', mvpData, winnerId);
     syncScoreToDB();
     alert(`Match Complete! 🏆 ${result}`);
   };
@@ -381,6 +393,10 @@ const ScoreMatch = () => {
       outBatsmenIds: [...currentOutBatsmen]
     });
 
+    // FIXED: syncScoreToDB() moved BEFORE setTimeout so it captures correct innings 1 data
+    // Previously it was inside setTimeout AFTER state was reset to 0, causing wrong data to sync
+    syncScoreToDB();
+
     setTimeout(() => {
       alert(`1st Innings Complete! Target: ${finalRuns + 1}`);
       setTargetScore(finalRuns + 1); setInnings(2);
@@ -391,7 +407,6 @@ const ScoreMatch = () => {
       setBowlerActive({ info: null, overs: 0, maidens: 0, balls: 0, runs: 0, wickets: 0 });
       setBatterStatsMap({}); setBowlerStatsMap({});
       setSetupStep(2); setMatchStatus('Scheduled'); setModalType('NONE');
-      syncScoreToDB(); // Sync on Innings Break
       setOversData([]);
       setRunsAtStartOfOver(0);
     }, 500);

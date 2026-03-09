@@ -161,7 +161,7 @@ const MyCricket = () => {
               <div className="flex justify-between items-center mb-6 border-b border-gray-200 pb-4">
                 <h3 className="text-xl font-extrabold text-blue-900">🏆 Matches</h3>
 
-                {/* 🗂️ SUB-TABS (Scheduled & Completed) */}
+                {/*  SUB-TABS (Scheduled & Completed) */}
                 <div className="flex gap-2 bg-gray-100 p-1 rounded-full shadow-inner">
                   <button
                     onClick={() => setMatchSubTab('Scheduled')}
@@ -193,7 +193,26 @@ const MyCricket = () => {
                         </span>
                       </div>
 
-                      <div className="text-right mb-4 mt-2">
+                      <div className="flex justify-between items-center mb-4 mt-2">
+
+  {/* Date and Time section */}
+  <div className="text-[10px] font-bold text-gray-500 bg-blue-50 px-2 py-1 rounded border border-blue-100 flex items-center gap-1">
+    <span>📅</span>
+    {(() => {
+      // match.date, match.matchDateTime, match.dateOfMatch
+      const d = match.date || match.matchDateTime || match.dateOfMatch;
+      if (!d) return "Date TBD";
+      const dateObj = new Date(d);
+      return isNaN(dateObj.getTime()) 
+        ? "Invalid Date" 
+        : dateObj.toLocaleString('en-IN', { 
+            day: '2-digit', 
+            month: 'short', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          });
+    })()}
+  </div>
                         <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-1 rounded uppercase tracking-wider">{match.totalOvers} Overs • {match.city}</span>
                       </div>
 

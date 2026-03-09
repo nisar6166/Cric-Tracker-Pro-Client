@@ -115,74 +115,6 @@ const ViewerMatches = () => {
         </div>
       );
     }
-
-    if (activeTab === 'Reports & Stats') {
-      return (
-        <div className="space-y-6 animate-fade-in">
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md text-center">
-              <h3 className="text-4xl font-black">{matches.length}</h3>
-              <p className="text-blue-100 text-sm font-bold mt-1 uppercase tracking-wider">Total Matches</p>
-            </div>
-            <div className="bg-green-500 text-white p-6 rounded-xl shadow-md text-center">
-              <h3 className="text-4xl font-black">{pastMatches.length}</h3>
-              <p className="text-green-100 text-sm font-bold mt-1 uppercase tracking-wider">Completed</p>
-            </div>
-            <div className="bg-red-500 text-white p-6 rounded-xl shadow-md text-center">
-              <h3 className="text-4xl font-black">{liveMatches.length}</h3>
-              <p className="text-red-100 text-sm font-bold mt-1 uppercase tracking-wider">Live Now</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Top Performers Chart (CSS Based) */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-              <h3 className="text-lg font-black text-gray-800 mb-4 border-b pb-2">🏏 Top Run Scorers</h3>
-              <div className="space-y-4">
-                {/* Mock Data for visual charts */}
-                {[
-                  { name: "Faris", team: "Nottingham CC", runs: 245, width: "95%" },
-                  { name: "Sreejith", team: "Nottingham CC", runs: 180, width: "75%" },
-                  { name: "Nisar", team: "Sunday CC", runs: 150, width: "60%" }
-                ].map((player, idx) => (
-                  <div key={idx}>
-                    <div className="flex justify-between text-sm font-bold text-gray-700 mb-1">
-                      <span>{player.name} <span className="text-[10px] text-gray-400 font-normal">({player.team})</span></span>
-                      <span>{player.runs}</span>
-                    </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2.5">
-                      <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: player.width }}></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-              <h3 className="text-lg font-black text-gray-800 mb-4 border-b pb-2">⚾ Top Wicket Takers</h3>
-              <div className="space-y-4">
-                {[
-                  { name: "Sreejith Appu", team: "Sunday CC", wkts: 12, width: "90%" },
-                  { name: "Shuaib", team: "Nottingham CC", wkts: 9, width: "70%" },
-                  { name: "Ratheesh", team: "Sunday CC", wkts: 7, width: "50%" }
-                ].map((player, idx) => (
-                  <div key={idx}>
-                    <div className="flex justify-between text-sm font-bold text-gray-700 mb-1">
-                      <span>{player.name} <span className="text-[10px] text-gray-400 font-normal">({player.team})</span></span>
-                      <span>{player.wkts}</span>
-                    </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2.5">
-                      <div className="bg-red-500 h-2.5 rounded-full" style={{ width: player.width }}></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
   };
 
   return (
@@ -196,7 +128,7 @@ const ViewerMatches = () => {
 
       <div className="bg-white shadow-sm border-b sticky top-0 z-10">
         <div className="flex max-w-5xl mx-auto overflow-x-auto hide-scrollbar">
-          {['Matches', 'Tournaments', 'Reports & Stats'].map((tab) => (
+          {['Matches', 'Tournaments'].map((tab) => (
             <button 
               key={tab} 
               onClick={() => setActiveTab(tab)} 

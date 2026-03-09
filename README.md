@@ -1,16 +1,28 @@
-# React + Vite
+# 🏏 CricTrackerPro - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+CricTrackerPro is a modern, responsive, and high-performance cricket tournament management and live scoring application. Built with **React.js** and **Tailwind CSS**, it provides a seamless interface for administrators, scorers, and viewers.
 
-Currently, two official plugins are available:
+## 🚀 Key Features
+- **Real-time Live Scoring:** Ball-by-ball updates and instant statistics.
+- **Role-Based Access:** Specialized dashboards for Admins, Scorers, and Viewers.
+- **Smart UI/UX:** Mobile-responsive design with a built-in "How to Use" guide.
+- **AI Insights (Prototype):** Dedicated AI module for match predictions and performance analysis.
+- **Dynamic Points Table:** Automatic NRR calculations and tournament standings.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 💻 Tech Stack
+- **Library:** React 18 (Vite)
+- **Styling:** Tailwind CSS
+- **Routing:** React Router Dom v6
+- **API Handling:** Axios
+- **Icons & UI:** Lucide Icons & Custom Emojis
 
-## React Compiler
+## 🛠️ Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Prerequisites
+- Node.js (v16 or higher)
+- npm or yarn
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Installation
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend

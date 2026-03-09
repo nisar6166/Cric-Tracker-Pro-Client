@@ -30,7 +30,7 @@ const TournamentDashboard = () => {
     const [logoPreview, setLogoPreview] = useState(null);
     const [isCreating, setIsCreating] = useState(false);
 
-    // --- Pool Management States ---
+    // Pool Management States
     const [isAssigningPools, setIsAssigningPools] = useState(false);
     // To make pools unlimited
     const [tempPools, setTempPools] = useState([
@@ -46,9 +46,9 @@ const TournamentDashboard = () => {
     const [showScheduleModal, setShowScheduleModal] = useState(false);
     const [isEditingMatch, setIsEditingMatch] = useState(false);
     const [editingMatchId, setEditingMatchId] = useState(null);
-    const [scheduleMatchData, setScheduleMatchData] = useState({ teamA: '', teamB: '', matchDateTime: '', totalOvers: 10, durationMinutes: 120 }); // durationMinutes ചേർത്തു
+    const [scheduleMatchData, setScheduleMatchData] = useState({ teamA: '', teamB: '', matchDateTime: '', totalOvers: 10, durationMinutes: 120 });
 
-   // Function to schedule and edit matches
+    // Function to schedule and edit matches
     const handleScheduleMatchSubmit = async (e) => {
         e.preventDefault();
         if (scheduleMatchData.teamA === scheduleMatchData.teamB) {
@@ -203,7 +203,7 @@ const TournamentDashboard = () => {
         }
 
         const updatedPools = [...tempPools];
-        
+
         updatedPools.forEach(p => {
             if (p.teams) {
                 p.teams = p.teams.filter(t => (t._id || t) !== teamId);
@@ -246,24 +246,92 @@ const TournamentDashboard = () => {
         } catch (err) { alert("Failed to save pools"); }
     };
 
+    // SMART KNOCKOUT GENERATOR (Supports Top 2, Top 4, Top 8, Top 16)
     const handleGenerateKnockouts = async () => {
-        const poolA = tournament.pools?.find(p => p.poolName === 'Pool A');
-        const poolB = tournament.pools?.find(p => p.poolName === 'Pool B');
-
-        if (!poolA || !poolB || poolA.teams.length < 2 || poolB.teams.length < 2) {
-            return alert("Make sure both Pool A and Pool B have at least 2 teams before generating knockouts!");
+        let allTeams = [];
+        if (tournament.pools && tournament.pools.length > 0) {
+            tournament.pools.forEach(p => {
+                allTeams = [...allTeams, ...p.teams.map(t => tournament.teams.find(tm => tm._id === (t._id || t)))];
+            });
+        } else {
+            allTeams = tournament.teams;
         }
 
-        const matchesToCreate = [
-            { teamA: poolA.teams[0]._id, teamB: poolB.teams[1]._id, date: new Date(), totalOvers: tournament.matches[0]?.totalOvers || 10 },
-            { teamA: poolB.teams[0]._id, teamB: poolA.teams[1]._id, date: new Date(), totalOvers: tournament.matches[0]?.totalOvers || 10 }
-        ];
+        allTeams = [...new Set(allTeams.filter(Boolean))];
 
-        if (!window.confirm(`Are you sure you want to generate 2 Semi-Final matches based on pool standings?`)) return;
+        if (allTeams.length < 2) return alert("You need at least 2 teams to generate knockouts!");
+
+        const sortedTeams = allTeams.map(team => {
+            const stats = getTeamStats(team._id || team);
+            return { team, pts: stats.pts, nrr: parseFloat(stats.nrr || 0) };
+        }).sort((a, b) => {
+            if (b.pts !== a.pts) return b.pts - a.pts;
+            return b.nrr - a.nrr;
+        });
+
+        const qualifyCountStr = window.prompt(
+            "🏆 How many top teams should qualify for Knockouts?\n\n" +
+            "Enter 2  👉 For Direct Final\n" +
+            "Enter 4  👉 For Semi-Finals\n" +
+            "Enter 8  👉 For Quarter-Finals\n" +
+            "Enter 16 👉 For Pre-Quarter-Finals",
+            "4"
+        );
+
+        if (!qualifyCountStr) return;
+        const qualifyCount = parseInt(qualifyCountStr);
+
+        // 16teams (Pre-Quarter)
+        if (![2, 4, 8, 16].includes(qualifyCount)) {
+            return alert("❌ Invalid input! Please enter exactly 2, 4, 8, or 16.");
+        }
+
+        if (sortedTeams.length < qualifyCount) {
+            return alert(`❌ Not enough teams! You selected Top ${qualifyCount}, but only have ${sortedTeams.length} teams.`);
+        }
+
+        const topTeams = sortedTeams.slice(0, qualifyCount).map(t => t.team._id || t.team);
+        let matchesToCreate = [];
+        let stageName = '';
+        const defaultOvers = tournament.matches[0]?.totalOvers || 10;
+
+        if (qualifyCount === 2) {
+            stageName = 'Final';
+            matchesToCreate = [{ teamA: topTeams[0], teamB: topTeams[1], date: new Date(), totalOvers: defaultOvers }];
+        } else if (qualifyCount === 4) {
+            stageName = 'Semi-Final';
+            matchesToCreate = [
+                { teamA: topTeams[0], teamB: topTeams[3], date: new Date(), totalOvers: defaultOvers },
+                { teamA: topTeams[1], teamB: topTeams[2], date: new Date(), totalOvers: defaultOvers }
+            ];
+        } else if (qualifyCount === 8) {
+            stageName = 'Quarter-Final';
+            matchesToCreate = [
+                { teamA: topTeams[0], teamB: topTeams[7], date: new Date(), totalOvers: defaultOvers },
+                { teamA: topTeams[1], teamB: topTeams[6], date: new Date(), totalOvers: defaultOvers },
+                { teamA: topTeams[2], teamB: topTeams[5], date: new Date(), totalOvers: defaultOvers },
+                { teamA: topTeams[3], teamB: topTeams[4], date: new Date(), totalOvers: defaultOvers }
+            ];
+        } else if (qualifyCount === 16) {
+            // 16teams Pre-Quarter fixturesss
+            stageName = 'Pre-Quarter-Final';
+            matchesToCreate = [
+                { teamA: topTeams[0], teamB: topTeams[15], date: new Date(), totalOvers: defaultOvers },
+                { teamA: topTeams[1], teamB: topTeams[14], date: new Date(), totalOvers: defaultOvers },
+                { teamA: topTeams[2], teamB: topTeams[13], date: new Date(), totalOvers: defaultOvers },
+                { teamA: topTeams[3], teamB: topTeams[12], date: new Date(), totalOvers: defaultOvers },
+                { teamA: topTeams[4], teamB: topTeams[11], date: new Date(), totalOvers: defaultOvers },
+                { teamA: topTeams[5], teamB: topTeams[10], date: new Date(), totalOvers: defaultOvers },
+                { teamA: topTeams[6], teamB: topTeams[9], date: new Date(), totalOvers: defaultOvers },
+                { teamA: topTeams[7], teamB: topTeams[8], date: new Date(), totalOvers: defaultOvers }
+            ];
+        }
+
+        if (!window.confirm(`Are you sure you want to generate ${matchesToCreate.length} ${stageName} match(es) for the Top ${qualifyCount} teams?`)) return;
 
         try {
-            await axios.post(`http://localhost:5000/api/tournaments/${id}/generate-knockouts`, { stage: 'Semi-Final', matches: matchesToCreate }, { headers: { 'Authorization': `Bearer ${token}` } });
-            alert("Semi-Final matches generated successfully! 🏆");
+            await axios.post(`http://localhost:5000/api/tournaments/${id}/generate-knockouts`, { stage: stageName, matches: matchesToCreate }, { headers: { 'Authorization': `Bearer ${token}` } });
+            alert(`✅ ${stageName} matches generated successfully! 🏆`);
             fetchTournamentData();
             setActiveTab('MATCHES');
         } catch (err) { alert("Failed to generate knockouts."); }
@@ -279,13 +347,13 @@ const TournamentDashboard = () => {
             for (let i = 0; i < teams.length; i++) {
                 for (let j = i + 1; j < teams.length; j++) {
                     allMatches.push({
-                        teamA: teams[i]._id || teams[i], 
-                        teamB: teams[j]._id || teams[j], 
-                        teamAName: teams[i].teamName, 
-                        teamBName: teams[j].teamName, 
+                        teamA: teams[i]._id || teams[i],
+                        teamB: teams[j]._id || teams[j],
+                        teamAName: teams[i].teamName,
+                        teamBName: teams[j].teamName,
                         poolName: pool.poolName,
-                        matchDateTime: '', 
-                        totalOvers: globalOvers, 
+                        matchDateTime: '',
+                        totalOvers: globalOvers,
                         durationMinutes: globalDuration
                     });
                 }
@@ -307,12 +375,12 @@ const TournamentDashboard = () => {
         if (!startTime) return;
         let newList = [...bulkMatchesList];
         newList[0].matchDateTime = startTime;
-        
+
         const gap = parseInt(duration) || 120;
-        
+
         for (let i = 1; i < newList.length; i++) {
             let prevDate = new Date(newList[i - 1].matchDateTime);
-            let nextDate = new Date(prevDate.getTime() + gap * 60000); 
+            let nextDate = new Date(prevDate.getTime() + gap * 60000);
             newList[i].matchDateTime = new Date(nextDate.getTime() - nextDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
         }
         setBulkMatchesList(newList);
@@ -324,13 +392,14 @@ const TournamentDashboard = () => {
         }
 
         try {
-            
+
             for (let match of bulkMatchesList) {
                 await axios.post(`http://localhost:5000/api/tournaments/${id}/schedule-match`, {
                     teamA: match.teamA,
                     teamB: match.teamB,
                     date: match.matchDateTime,
-                    totalOvers: match.totalOvers
+                    totalOvers: match.totalOvers,
+                    durationMinutes: match.durationMinutes || globalDuration
                 }, { headers: { 'Authorization': `Bearer ${token}` } });
             }
             alert("All matches scheduled successfully! 🚀");
@@ -371,9 +440,9 @@ const TournamentDashboard = () => {
         tournament.matches.forEach(match => {
             const matchStatus = match.status?.toLowerCase()?.trim();
             const roundName = match.roundName?.toLowerCase()?.trim();
-            
+
             if ((!roundName || roundName === 'league') && ['completed', 'abandoned'].includes(matchStatus)) {
-                
+
                 const teamA_Id = String(match.teamA?._id || match.teamA);
                 const teamB_Id = String(match.teamB?._id || match.teamB);
 
@@ -408,7 +477,7 @@ const TournamentDashboard = () => {
 
                     // Match result logic: Determining Win, Loss, or No Result (NR)
                     if (matchStatus === 'abandoned' || match.isNoResult) {
-                        stats.nr += 1; 
+                        stats.nr += 1;
                         stats.pts += 1;
                     } else if (matchStatus === 'completed') {
                         const winnerField = match.winner || match.winningTeam || match.matchWinner;
@@ -416,13 +485,13 @@ const TournamentDashboard = () => {
 
                         if (winnerId && winnerId !== 'undefined' && winnerId !== 'null') {
                             if (winnerId === currentTeamId) {
-                                stats.w += 1; 
+                                stats.w += 1;
                                 stats.pts += 2;
                             } else {
-                                stats.l += 1; 
+                                stats.l += 1;
                             }
                         } else {
-                            stats.nr += 1; 
+                            stats.nr += 1;
                             stats.pts += 1;
                         }
                     }
@@ -444,7 +513,7 @@ const TournamentDashboard = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans pb-10">
-            {/* --- BANNER & LOGO --- */}
+            {/* BANNER & LOGO */}
             <div className="relative bg-blue-900 h-48 md:h-64 flex justify-center items-center">
                 {tournament.tournamentBanner ? <img src={`http://localhost:5000/${tournament.tournamentBanner}`} className="w-full h-full object-cover opacity-50" alt="Banner" /> : <div className="w-full h-full bg-gradient-to-r from-blue-900 to-indigo-800 opacity-90"></div>}
                 <div className="absolute -bottom-12 left-6 md:left-12 flex items-end gap-4">
@@ -462,7 +531,7 @@ const TournamentDashboard = () => {
                 {isAdmin && <Link to={`/edit-tournament/${tournament._id}`} className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold shadow-sm text-sm">✏️ Edit</Link>}
             </div>
 
-            {/* --- TABS --- */}
+            {/* TABS */}
             <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-20 overflow-x-auto flex">
                 {['INFO', 'TEAMS', 'MATCHES', 'POINTS TABLE'].map((tab) => (
                     <button key={tab} onClick={() => setActiveTab(tab)} className={`py-4 px-8 text-sm font-black whitespace-nowrap border-b-4 transition ${activeTab === tab ? 'border-blue-600 text-blue-700 bg-blue-50' : 'border-transparent text-gray-500 hover:bg-gray-50'}`}>
@@ -547,7 +616,7 @@ const TournamentDashboard = () => {
 
                         {isAdmin && (
                             <div className="flex flex-wrap gap-2 mb-4">
-                
+
                                 {isAssigningPools && (
                                     <button onClick={addNewPool} className="bg-gray-800 text-white px-4 py-2 rounded-lg font-bold text-xs border hover:bg-black transition">
                                         + Add New Pool
@@ -593,7 +662,7 @@ const TournamentDashboard = () => {
                                                             <img src={`http://localhost:5000/${team.teamLogo}`} className="w-6 h-6 rounded-full object-cover" alt="logo" />
                                                             <span className="font-bold text-xs">{team.teamName}</span>
                                                         </div>
-                                                        
+
                                                         <button onClick={() => removeFromPool(team._id)} className="text-red-500 hover:text-red-700 font-bold px-1">✕</button>
                                                     </div>
                                                 ) : null;
@@ -689,7 +758,7 @@ const TournamentDashboard = () => {
                 {activeTab === 'MATCHES' && (
                     <div className="animate-fade-in">
 
-                        {/* ---  LEAGUE MATCHES SECTION --- */}
+                        {/* LEAGUE MATCHES SECTION */}
                         <div className="mb-12">
                             <div className="flex justify-between items-center mb-6">
                                 <h2 className="text-xl font-black text-gray-800 uppercase tracking-widest">League Matches</h2>
@@ -710,10 +779,19 @@ const TournamentDashboard = () => {
                                         <div className="flex justify-between items-center mb-3">
                                             <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest ${match.status === 'Live' ? 'bg-red-500 text-white animate-pulse' : match.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{match.status || 'Scheduled'}</span>
 
-                                            {/* showing time */}
-                                            <span className="text-xs font-bold text-gray-500">
-                                                {new Date(match.date).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
-                                            </span>
+                                            {/*  Match Date & Time Display Section */}
+<span className="text-xs font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-100 flex items-center gap-1">
+    <span>📅</span>
+    {(() => {
+        const d = match.date || match.matchDateTime;
+        if (!d) return "Date TBD";
+        const dateObj = new Date(d);
+        return isNaN(dateObj.getTime()) 
+            ? "Invalid Date" 
+            : dateObj.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+    })()}
+</span>
+
                                         </div>
                                         <div className="flex justify-between items-center bg-gray-50 p-4 rounded-xl border border-gray-100 mb-4 relative">
                                             <span className="font-black text-blue-900 truncate w-2/5 text-center">{match.teamA?.teamName}</span>
@@ -721,11 +799,11 @@ const TournamentDashboard = () => {
                                             <span className="font-black text-blue-900 truncate w-2/5 text-center">{match.teamB?.teamName}</span>
 
                                             {/* match minutes scheduling */}
-                                            {match.durationMinutes && (
-                                                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-100 text-blue-800 text-[9px] font-bold px-2 py-0.5 rounded-md">
-                                                    ⏱️ {match.durationMinutes} Mins
-                                                </div>
-                                            )}
+{(match.durationMinutes || tournament.globalDuration) && (
+    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-100 text-blue-800 text-[9px] font-bold px-2 py-0.5 rounded-md border border-blue-200">
+        ⏱️ {match.durationMinutes || tournament.globalDuration || 120} Mins
+    </div>
+)}
                                         </div>
 
                                         {/* edit, delete buttons for admins only */}
@@ -749,7 +827,7 @@ const TournamentDashboard = () => {
                             </div>
                         </div>
 
-                        {/* ---  TOURNAMENT BRACKETS --- */}
+                        {/* TOURNAMENT BRACKETS */}
                         <div className="border-t border-gray-200 pt-8">
                             <div className="flex justify-between items-center mb-6">
                                 <h2 className="text-xl font-black text-gray-800 uppercase tracking-widest">Tournament Brackets</h2>
@@ -956,7 +1034,7 @@ const TournamentDashboard = () => {
                                     <label className="block text-xs font-bold text-gray-600 mb-1 uppercase">Total Overs</label>
                                     <input type="number" required value={scheduleMatchData.totalOvers} onChange={(e) => setScheduleMatchData({ ...scheduleMatchData, totalOvers: e.target.value })} className="w-full border border-gray-300 p-3 rounded-lg font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500" />
                                 </div>
-            
+
                                 <div className="flex-1">
                                     <label className="block text-xs font-bold text-gray-600 mb-1 uppercase">Duration (Mins)</label>
                                     <input type="number" required value={scheduleMatchData.durationMinutes} onChange={(e) => setScheduleMatchData({ ...scheduleMatchData, durationMinutes: e.target.value })} className="w-full border border-gray-300 p-3 rounded-lg font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500" placeholder="Eg: 120" />
@@ -1020,20 +1098,20 @@ const TournamentDashboard = () => {
                             <h3 className="text-xl font-black text-blue-900">Smart Schedule Matches ⚡</h3>
                             <button onClick={() => setShowBulkModal(false)} className="text-gray-400 hover:text-red-500 font-bold w-8 h-8 bg-gray-100 rounded-full flex justify-center items-center">✕</button>
                         </div>
-                        
+
                         <div className="flex gap-4 mb-5 p-4 bg-blue-50 border border-blue-200 rounded-xl">
                             <div className="flex-1">
                                 <label className="block text-xs font-bold text-blue-900 mb-1">Overs (All Matches)</label>
                                 <input type="number" value={globalOvers} onChange={(e) => {
                                     setGlobalOvers(e.target.value);
-                                    setBulkMatchesList(bulkMatchesList.map(m => ({...m, totalOvers: e.target.value})));
+                                    setBulkMatchesList(bulkMatchesList.map(m => ({ ...m, totalOvers: e.target.value })));
                                 }} className="border border-blue-200 p-2 rounded-lg w-full font-bold text-gray-700 outline-none" />
                             </div>
                             <div className="flex-1">
                                 <label className="block text-xs font-bold text-blue-900 mb-1">Duration Per Match (Mins)</label>
                                 <input type="number" value={globalDuration} onChange={(e) => {
                                     setGlobalDuration(e.target.value);
-                                    if(bulkMatchesList.length > 0 && bulkMatchesList[0].matchDateTime) {
+                                    if (bulkMatchesList.length > 0 && bulkMatchesList[0].matchDateTime) {
                                         autoCalculateTimes(bulkMatchesList[0].matchDateTime, e.target.value);
                                     }
                                 }} className="border border-blue-200 p-2 rounded-lg w-full font-bold text-gray-700 outline-none" />
@@ -1049,11 +1127,11 @@ const TournamentDashboard = () => {
                                     </div>
                                     <div className="flex flex-col">
                                         <label className="text-[9px] font-bold text-gray-400 uppercase mb-1">{idx === 0 ? 'Start Time (Sets for all)' : 'Match Time'}</label>
-                                        <input 
+                                        <input
                                             type="datetime-local" required value={match.matchDateTime}
                                             className={`border p-2 rounded-lg text-xs font-bold text-gray-700 outline-none ${idx === 0 ? 'border-purple-400 ring-2 ring-purple-100' : 'bg-white'}`}
                                             onChange={(e) => {
-                                                if (idx === 0) { autoCalculateTimes(e.target.value, globalDuration); } 
+                                                if (idx === 0) { autoCalculateTimes(e.target.value, globalDuration); }
                                                 else { let newList = [...bulkMatchesList]; newList[idx].matchDateTime = e.target.value; setBulkMatchesList(newList); }
                                             }}
                                         />

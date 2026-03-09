@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ForgotPassword from './components/ForgotPassword';
 import MyCricket from './pages/MyCricket';
 import Contact from './pages/Contact';
 import Inbox from './pages/Inbox';
@@ -16,8 +17,9 @@ import ViewerMatches from './pages/ViewerMatches';
 import ViewerLiveMatches from './pages/ViewerLiveMatches';
 import ViewScore from './pages/ViewScore';
 import TournamentDashboard from './pages/TournamentDashboard';
-import ViewerTournamentDetails from './pages/TournamentDashboard';
+import ViewerTournamentDetails from './pages/ViewerTournamentDetails';
 import About from './pages/About';
+import Privacy from './pages/Privacy';
 
 function App() {
   return (
@@ -26,6 +28,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/mycricket" element={<MyCricket />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/inbox" element={<Inbox />} />
@@ -43,6 +46,8 @@ function App() {
         <Route path="/tournament/:id" element={<TournamentDashboard />} />
         <Route path="/viewer/tournament/:id" element={<ViewerTournamentDetails />} />
         <Route path="/about" element={<About />} />
+        <Route path="/privacy" element={<Privacy />} />
+       
 
       </Routes>
     </Router>
