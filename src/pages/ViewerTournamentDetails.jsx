@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import AiInsights from '../components/AiInsights';
 
 // NRR HELPERS
 
@@ -307,59 +308,72 @@ const ViewerTournamentDetails = () => {
                 : 'Date Not Set';
 
               return (
-                <Link to={`/view-score/${match._id}`} key={match._id}
-                  className="block bg-white p-5 rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-blue-300 transition group">
-                  <div className="flex justify-between items-center mb-4">
-                    
-                    <span className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-                       📅 {dateStr}
-                    </span>
-                    
-                    <span className={`text-[10px] px-2.5 py-1 rounded-full font-black ${
-                      match.status === 'Live'      ? 'bg-red-500 text-white animate-pulse' :
-                      match.status === 'Completed' ? 'bg-green-100 text-green-700'         :
-                      'bg-gray-100 text-gray-600'
-                    }`}>
-                      {match.status?.toUpperCase()}
-                    </span>
-                  </div>
+                // AI Insights
+                <div key={match._id} className="mb-6 space-y-2">
+                  
+                  {/* 🤖 MATCH-SPECIFIC AI REPORT */}
+                  <AiInsights 
+                    teamA={match.teamA?.teamName || match.teamA?.shortName || 'Team A'} 
+                    teamB={match.teamB?.teamName || match.teamB?.shortName || 'Team B'} 
+                    status={match.status || 'Scheduled'} 
+                    result={match.result || ''} 
+                  />
 
-                  <div className="flex justify-between items-center">
-                    {/* Team A */}
-                    <div className="flex items-center gap-3 w-2/5">
-                      <div className="w-10 h-10 rounded-full border-2 border-gray-100 flex items-center justify-center text-white text-xs font-black shrink-0 shadow-sm"
-                        style={{ backgroundColor: match.teamA?.teamColor || '#1e3a8a' }}>
-                        {match.teamA?.shortName?.slice(0, 2) || match.teamA?.teamName?.slice(0, 2).toUpperCase()}
-                      </div>
-                      <span className="font-bold text-gray-800 text-sm leading-tight">{match.teamA?.teamName}</span>
+                  {/* 🏏 MATCH CARD */}
+                  <Link to={`/view-score/${match._id}`}
+                    className="block bg-white p-5 rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-blue-300 transition group">
+                    <div className="flex justify-between items-center mb-4">
+                      
+                      <span className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
+                         📅 {dateStr}
+                      </span>
+                      
+                      <span className={`text-[10px] px-2.5 py-1 rounded-full font-black ${
+                        match.status === 'Live'      ? 'bg-red-500 text-white animate-pulse' :
+                        match.status === 'Completed' ? 'bg-green-100 text-green-700'         :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        {match.status?.toUpperCase()}
+                      </span>
                     </div>
 
-                    {/* VS */}
-                    <div className="font-black text-gray-300 w-1/5 text-center text-sm">VS</div>
+                    <div className="flex justify-between items-center">
+                      {/* Team A */}
+                      <div className="flex items-center gap-3 w-2/5">
+                        <div className="w-10 h-10 rounded-full border-2 border-gray-100 flex items-center justify-center text-white text-xs font-black shrink-0 shadow-sm"
+                          style={{ backgroundColor: match.teamA?.teamColor || '#1e3a8a' }}>
+                          {match.teamA?.shortName?.slice(0, 2) || match.teamA?.teamName?.slice(0, 2)?.toUpperCase()}
+                        </div>
+                        <span className="font-bold text-gray-800 text-sm leading-tight">{match.teamA?.teamName}</span>
+                      </div>
 
-                    {/* Team B */}
-                    <div className="flex items-center gap-3 w-2/5 justify-end">
-                      <span className="font-bold text-gray-800 text-sm text-right leading-tight">{match.teamB?.teamName}</span>
-                      <div className="w-10 h-10 rounded-full border-2 border-gray-100 flex items-center justify-center text-white text-xs font-black shrink-0 shadow-sm"
-                        style={{ backgroundColor: match.teamB?.teamColor || '#15803d' }}>
-                        {match.teamB?.shortName?.slice(0, 2) || match.teamB?.teamName?.slice(0, 2).toUpperCase()}
+                      {/* VS */}
+                      <div className="font-black text-gray-300 w-1/5 text-center text-sm">VS</div>
+
+                      {/* Team B */}
+                      <div className="flex items-center gap-3 w-2/5 justify-end">
+                        <span className="font-bold text-gray-800 text-sm text-right leading-tight">{match.teamB?.teamName}</span>
+                        <div className="w-10 h-10 rounded-full border-2 border-gray-100 flex items-center justify-center text-white text-xs font-black shrink-0 shadow-sm"
+                          style={{ backgroundColor: match.teamB?.teamColor || '#15803d' }}>
+                          {match.teamB?.shortName?.slice(0, 2) || match.teamB?.teamName?.slice(0, 2)?.toUpperCase()}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Result */}
-                  {match.result && (
-                    <p className="mt-3 text-center text-xs font-bold text-green-700 bg-green-50 py-1.5 rounded-lg">
-                      🏆 {match.result}
-                    </p>
-                  )}
+                    {/* Result */}
+                    {match.result && (
+                      <p className="mt-3 text-center text-xs font-bold text-green-700 bg-green-50 py-1.5 rounded-lg">
+                        🏆 {match.result}
+                      </p>
+                    )}
 
-                  <div className="mt-3 text-center">
-                    <span className="text-blue-600 text-xs font-bold group-hover:underline">
-                      View Scorecard ➡️
-                    </span>
-                  </div>
-                </Link>
+                    <div className="mt-3 text-center">
+                      <span className="text-blue-600 text-xs font-bold group-hover:underline">
+                        View Scorecard ➡️
+                      </span>
+                    </div>
+                  </Link>
+                </div>
               );
             })}
           </div>
